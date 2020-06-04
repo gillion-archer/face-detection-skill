@@ -17,7 +17,7 @@ class FaceDetection(MycroftSkill):
             ret, frame = cam.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # Detect faces
-            faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+            faces = face_cascade.detectMultiScale(gray, 1.2, 4)
 #            for (x, y, w, h) in faces:
 #                cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
