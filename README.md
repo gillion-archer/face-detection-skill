@@ -2,7 +2,7 @@
 Activates webcam to watch for faces
 
 ## About
-Activates webcam, watches until it regcognizes a faces, then terminates
+Activates webcam, watches until it recognizes a face
 
 ## Examples
 * "Keep an eye out"

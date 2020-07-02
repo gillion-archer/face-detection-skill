@@ -9,12 +9,12 @@ class FaceDetection(MycroftSkill):
     @intent_file_handler('detection.face.intent')
     def handle_detection_face(self, message):
         recognizer = cv2.face.LBPHFaceRecognizer_create()
-        recognizer.read('/home/gillion/Documents/camera/trainer.yml')
-        faceCascade = cv2.CascadeClassifier("/home/gillion/Documents/camera/haarcascade_frontalface_default.xml")
+        recognizer.read('/home/craghack/Documents/camera/trainer.yml')
+        faceCascade = cv2.CascadeClassifier("/home/craghack/Documents/camera/haarcascade_frontalface_default.xml")
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         names = ['unknown']
-        ids =  open("/home/gillion/Documents/camera/ids.txt", "r")
+        ids =  open("/home/craghack/Documents/camera/ids.txt", "r")
         for line in ids:
             names.append(line.split(' ')[2].rstrip())
         ids.close()
