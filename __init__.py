@@ -2,16 +2,27 @@ from mycroft import MycroftSkill, intent_file_handler
 import cv2
 import numpy as np
 
+from pymouse import PyMouse
+from pynput.keyboard import Key, Controller
+import os
+import subprocess
+from time import sleep
+
 class FaceDetection(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
 
     @intent_file_handler('detection.face.intent')
     def handle_detection_face(self, message):
+        keyboard = Controller()
+        m = PyMouse()
+        right = Key.right
+        left = Key.left
+
         recognizer = cv2.face.LBPHFaceRecognizer_create()
         recognizer.read('/home/craghack/Documents/camera/trainer.yml')
         faceCascade = cv2.CascadeClassifier("/home/craghack/Documents/camera/haarcascade_frontalface_default.xml")
-        font = cv2.FONT_HERSHEY_SIMPLEX
+        #font = cv2.FONT_HERSHEY_SIMPLEX
 
         names = ['unknown']
         ids =  open("/home/craghack/Documents/camera/ids.txt", "r")
@@ -21,14 +32,35 @@ class FaceDetection(MycroftSkill):
 
         # Initialize and start realtime video capture
         cam = cv2.VideoCapture(0)
-        cam.set(3, 640) # set video widht
-        cam.set(4, 480) # set video height
+        #cam.set(3, 640) # set video widht
+        #cam.set(4, 480) # set video height
 
         minW = 0.1*cam.get(3)
         minH = 0.1*cam.get(4)
+
+        emoji = None
+        cmd = subprocess.check_output("wmctrl -l | grep \".png\" | cut -b 23-", shell=True).decode("utf-8").rstrip()
+        if not cmd == "":
+            emoji = cmd.split('.')[0]
+            os.system("wmctrl -a \"" + cmd + "\"")
+            sleep(.25)
+            m.click(350, 460)
+            sleep(.25)
+            m.move(799,479)
+        if emoji == "happy":
+            keyboard.press(left)
+            keyboard.release(left)
+            emoji = "suspicious"
+        elif emoji == "suprised":
+            keyboard.press(right)
+            keyboard.release(right)
+            emoji = "suspicious"
+
         self.speak_dialog('detection.face')
 
         confident = False
+        count = 0
+        recognized = []
         while not confident:
             rval, frame = cam.read()
             gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
@@ -43,38 +75,45 @@ class FaceDetection(MycroftSkill):
 
                 id = names[id-1]
                 if (id == "unknown") and (confidence > 50):
-                    confident = True
-                    self.speak_dialog('seen.face')
-                    confidence = "  {0}%".format(round(confidence))
-                elif (confidence > 35):
-                    confident = True
-                    self.speak_dialog('identified.face')
-                    confidence = "  {0}%".format(round(confidence))
-
-#                if (confidence > 50):
 #                    confident = True
-#                    id = names[id-1]
-#                    if id == "unknown":
-#                        self.speak_dialog('seen.face')
-#                    else:
-#                        self.speak_dialog('identified.face')
-#                    confidence = "  {0}%".format(round(confidence))
+                    if emoji == "suspicious":
+                        keyboard.press(left)
+                        keyboard.release(left)
+                        sleep(.75)
+                        keyboard.press(right)
+                        keyboard.release(right)
+                    elif emoji == "happy":
+                        keyboard.press(right)
+                        keyboard.release(right)
+                        sleep(.75)
+                        keyboard.press(right)
+                        keyboard.release(right)
+                    recognized.append("unknown")
+                    self.speak_dialog('seen.face')
+                elif (confidence > 35):
+#                    confident = True
+                    if id not in recognized:
+                        if emoji == "suspicious":
+                            keyboard.press(right)
+                            keyboard.release(right)
+                            emoji = "happy"
+                        elif emoji == "happy":
+                            keyboard.press(right)
+                            keyboard.release(right)
+                            sleep(.75)
+                            keyboard.press(left)
+                            keyboard.release(left)
+                        recognized.append(id)
+                        dialog = id + '.face'
+                        self.speak_dialog(dialog)
 
-                # If confidence is less then 50 ==> "0" : perfect match
-#                if (confidence > 50):
-#                    self.speak_dialog('identified.face')
-#                    id = names[id]
-#                    confidence = "  {0}%".format(round(confidence))
-#                else:
-#                    self.speak_dialog('seen.face')
-#                    id = names[0]
-#                    confidence = "  {0}%".format(round(confidence))
-                
-                    break
-            if(len(faces)):
-                cv2.putText(frame, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
-                cv2.putText(frame, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)
-                cv2.imwrite("capture.jpg", frame)
+            if len(recognized) != 0 and len(recognized) >= len(faces):
+                count += 1
+                if (count >= 30):
+                    confident = True
+            else:
+                count = 0
+
         cam.release()
 
 
