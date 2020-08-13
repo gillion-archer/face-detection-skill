@@ -43,10 +43,13 @@ class FaceDetection(MycroftSkill):
         if not cmd == "":
             emoji = cmd.split('.')[0]
             os.system("wmctrl -a \"" + cmd + "\"")
-            sleep(.25)
-            m.click(350, 460)
-            sleep(.25)
-            m.move(799,479)
+        else:
+            emoji = "suspicious"
+            os.system("xdg-open /home/craghack/Downloads/emojis/suspicious.png")
+        sleep(.25)
+        m.click(350, 460)
+        sleep(.25)
+        m.move(799,479)
         if emoji == "happy":
             keyboard.press(left)
             keyboard.release(left)
