@@ -45,7 +45,7 @@ class FaceDetection(MycroftSkill):
             os.system("wmctrl -a \"" + cmd + "\"")
         else:
             emoji = "suspicious"
-            os.system("xdg-open /home/craghack/Downloads/emojis/suspicious.png")
+            os.system("xdg-open /home/craghack/Downloads/emojis/suspicious.png && sleep 1")
         sleep(.25)
         m.click(350, 460)
         sleep(.25)
@@ -112,12 +112,15 @@ class FaceDetection(MycroftSkill):
 
             if len(recognized) != 0 and len(recognized) >= len(faces):
                 count += 1
-                if (count >= 30):
+                if (count >= 50):
                     confident = True
             else:
                 count = 0
 
         cam.release()
+#        keyboard.press(Key.esc)
+#        keyboard.release(Key.esc)
+#        os.system("wmctrl -a start-mycroft.sh debug")
 
 
 def create_skill():
